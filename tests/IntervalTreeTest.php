@@ -12,6 +12,23 @@ final class IntervalTreeTest extends TestCase
         );
     }
 
+    public function testFindExclusiveIntervalsIntersection(): void
+    {
+        $intervals = [[6, 8], [1, 4], [2, 3], [5, 12], [1, 1], [3, 5], [5, 7], [9, 15], [6, 18], [22, 344]];
+        $tree = new IntervalTree();
+        for ($i = 0; $i < count($intervals); $i++) {
+            $tree->insert($intervals[$i], $i);
+        }
+
+        $nodesInRange = $tree->iterateExclusiveIntersections([2, 3]);
+        $intersectedIntervalIndexes = [];
+        foreach ($nodesInRange as $node) {
+            $intersectedIntervalIndexes[] = $node->getValue();
+        }
+
+        $this->assertEquals($intersectedIntervalIndexes, [2]);
+    }
+
     public function testFindAllIntervalsIntersection(): void
     {
         $intervals = [[6, 8], [1, 4], [2, 3], [5, 12], [1, 1], [3, 5], [5, 7], [9, 15], [6, 18], [22, 344]];

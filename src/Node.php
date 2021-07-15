@@ -93,6 +93,11 @@ class Node
         return $this->item->key->intersect($otherNode->item->key);
     }
 
+    public function intersectExclusive($otherNode)
+    {
+        return $this->item->key->intersectExclusive($otherNode->item->key);
+    }
+
     public function copyData($otherNode)
     {
         $this->item->key = clone $otherNode->item->key;

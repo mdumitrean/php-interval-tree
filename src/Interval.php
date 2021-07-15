@@ -35,6 +35,11 @@ class Interval
         return !$this->notIntersect($otherInterval);
     }
 
+    public function intersectExclusive(Interval $otherInterval)
+    {
+        return $this->equalTo($otherInterval);
+    }
+
     public function notIntersect(Interval $otherInterval)
     {
         return ($this->high < $otherInterval->low || $otherInterval->high < $this->low);
