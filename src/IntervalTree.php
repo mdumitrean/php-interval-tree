@@ -99,6 +99,19 @@ class IntervalTree
     }
 
     /**
+     * Iterator of nodes which keys intersect with given interval
+     * If no values stored in the tree, returns array of keys which intersect given interval
+     * @param array $interval
+     * @return Iterator
+     */
+    public function iterateExclusiveIntersections(array $interval): Iterator
+    {
+        $searchNode = new Node($interval);
+        $res = [];
+        yield from $this->treeSearchInterval($this->root, $searchNode, $res, true);
+    }
+
+    /**
      * Check that interval has intersections
      *
      * @param array $interval
@@ -107,6 +120,18 @@ class IntervalTree
     public function hasIntersection(array $interval): bool
     {
         $nodesIterator = $this->iterateIntersections($interval);
+        return $nodesIterator->current() !== null;
+    }
+
+    /**
+     * Check that interval has an exclusive intersection
+     *
+     * @param array $interval
+     * @return boolean
+     */
+    public function hasExclusiveIntersection(array $interval): bool
+    {
+        $nodesIterator = $this->iterateExclusiveIntersections($interval);
         return $nodesIterator->current() !== null;
     }
 
@@ -122,6 +147,17 @@ class IntervalTree
         return iterator_count($nodesIterator);
     }
 
+    /**
+     * Count intervals that has intersections
+     *
+     * @param array $interval
+     * @return boolean
+     */
+    public function countExclusiveIntersections($interval): int
+    {
+        $nodesIterator = $this->iterateExclusiveIntersections($interval);
+        return iterator_count($nodesIterator);
+    }
     /**
      * Insert new item into interval tree
      *
@@ -175,8 +211,9 @@ class IntervalTree
         $deleteNode = $this->treeSearch($this->root, $searchNode);
         if ($deleteNode) {
             $this->treeDelete($deleteNode);
+            return true;
         }
-        return $deleteNode;
+        return false;
     }
 
     /**
@@ -431,21 +468,25 @@ class IntervalTree
 
     // Original search_interval method; container res support push() insertion
     // Search all intervals intersecting given one
-    public function treeSearchInterval($node, $searchNode, &$res = [])
+    public function treeSearchInterval($node, $searchNode, &$res = [], $exclusive = false)
     {
         if ($node !== null && $node !== $this->nilNode) {
             // if (node->left !== this.nil_node && node->left->max >= low) {
             if ($node->left !== $this->nilNode && !$node->notIntersectLeftSubtree($searchNode)) {
-                yield from $this->treeSearchInterval($node->left, $searchNode, $res);
+                yield from $this->treeSearchInterval($node->left, $searchNode, $res, $exclusive);
             }
             // if (low <= node->high && node->low <= high) {
-            if ($node->intersect($searchNode)) {
+            if (!$exclusive && $node->intersect($searchNode)) {
+                $res[] = $node;
+                yield $node;
+            }
+            if ($exclusive && $node->intersectExclusive($searchNode)) {
                 $res[] = $node;
                 yield $node;
             }
             // if (node->right !== this.nil_node && node->low <= high) {
             if ($node->right !== $this->nilNode && !$node->notIntersectRightSubtree($searchNode)) {
-                yield from $this->treeSearchInterval($node->right, $searchNode, $res);
+                yield from $this->treeSearchInterval($node->right, $searchNode, $res, $exclusive);
             }
         }
     }
