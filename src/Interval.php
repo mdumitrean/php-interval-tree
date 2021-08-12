@@ -37,12 +37,17 @@ class Interval
 
     public function intersectExclusive(Interval $otherInterval)
     {
-        return $this->equalTo($otherInterval);
+        return !$this->notIntersectExclusive($otherInterval);
     }
 
     public function notIntersect(Interval $otherInterval)
     {
         return ($this->high < $otherInterval->low || $otherInterval->high < $this->low);
+    }
+
+    public function notIntersectExclusive(Interval $otherInterval)
+    {
+        return ($this->high <= $otherInterval->low || $otherInterval->high <= $this->low);
     }
 
     public function merge(Interval $otherInterval)
